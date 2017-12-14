@@ -19,25 +19,30 @@ $("#add-train-btn").on("click", function(event) {
   // Grabs user input
   var trainName = $("#train-name-input").val().trim();
   var trainDest = $("#destination-input").val().trim();
-  var firstTrainTime = moment($("#first-train-time-input").val().trim(), "HH:mm").format("HH:mm");
+  var firstTrainTime = $("#first-train-time-input").val().trim();
   var trainFreq = $("#frequency-input").val().trim();
+
+  var firstTimeConverted = moment(firstTrainTime, "hh:mm").subtract(1, "years");
+  var currentTime = moment();
+  var diffTime = moment().diff(moment(firstTimeConverted), "minutes");
+  var tRemainder = diffTime % trainFreq;
+  var minutesTillTrain = trainFreq - tRemainder;
+  var nextTrain = moment().add(minutesTillTrain, "minutes");
+  var nextTrainFormatted = moment(nextTrain).format("hh:mm");
+
 
   // Creates local "temporary" object for holding train information
   var newTrain = {
     name: trainName,
     destination: trainDest,
     time: firstTrainTime,
-    frequency: trainFreq
+    frequency: trainFreq,
+    nextArrival: nextTrainFormatted,
+    minutesAway: minutesTillTrain,
   };
 
   // Uploads train data to the database
   database.ref().push(newTrain);
-
-  // Logs everything to console
-  console.log(newTrain.name);
-  console.log(newTrain.destination);
-  console.log(newTrain.time);
-  console.log(newTrain.frequency);
 
   // Alert
   alert("Train Info successfully added");
@@ -58,26 +63,22 @@ database.ref().on("child_added", function(childSnapshot, prevChildKey) {
   // Store everything into a variable.
   var trainName = childSnapshot.val().name;
   var trainDest = childSnapshot.val().destination;
-  var firstTrainTime = childSnapshot.val().start;
+  var firstTrainTime = childSnapshot.val().time;
   var trainFreq = childSnapshot.val().frequency;
+  var nextTrainFormatted = childSnapshot.val().nextArrival;
+  var minutesTillTrain = childSnapshot.val().minutesAway;
 
   // Train Info
   console.log(trainName);
   console.log(trainDest);
   console.log(firstTrainTime);
   console.log(trainFreq);
+  console.log(nextTrainFormatted);
+  console.log(minutesTillTrain);
 
   // Prettify the first train time
   // var firstTrainTimePretty = moment.unix(firstTrainTime).format("HH:mm");
 
-  // Calculate the next Arrival
-  // var nextArrival = firstTrainTime;
-  // console.log(nextArrival);
-
-  // Calculate the total billed rate
-  // var empBilled = empMonths * empRate;
-  // console.log(empBilled);
-
   // Add each train's data into the table
-  $("#train-table > tbody").append("<tr><td>" + trainName + "</td><td>" + trainDest + "</td><td>" + trainFreq + " minutes" + "</td></tr>");
+  $("#train-table > tbody").append("<tr><td>" + trainName + "</td><td>" + trainDest + "</td><td>" + trainFreq + " minutes" + "</td><td>" + nextTrainFormatted + "</td><td>" + minutesTillTrain + "</td></tr>");
 });
