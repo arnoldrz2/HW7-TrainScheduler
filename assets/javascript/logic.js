@@ -76,9 +76,6 @@ database.ref().on("child_added", function(childSnapshot, prevChildKey) {
   console.log(nextTrainFormatted);
   console.log(minutesTillTrain);
 
-  // Prettify the first train time
-  // var firstTrainTimePretty = moment.unix(firstTrainTime).format("HH:mm");
-
   // Add each train's data into the table
   $("#train-table > tbody").append("<tr><td>" + trainName + "</td><td>" + trainDest + "</td><td>" + trainFreq + " minutes" + "</td><td>" + nextTrainFormatted + "</td><td>" + minutesTillTrain + "</td></tr>");
 });
